@@ -1,0 +1,6 @@
+{
+  "mongoURI": "mongodb+srv://just_b:Brywan8035@mernconn.tfowv.mongodb.net/JustbConn?retryWrites=true&w=majority",
+  "jwtToken": "mysecrettoken",
+  "githubclientid":"a6f200678347430df4d0",
+  "githubsecret":"ca46b6d27ed8eafe891625b007cf49e9f4cee508"
+}
