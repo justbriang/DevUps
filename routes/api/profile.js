@@ -2,11 +2,12 @@ const express = require("express");
 const router = express.Router();
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
+const Post = require("../../models/Posts");
 const auth = require("../../middlewares/auth");
 const { check, validationResult } = require("express-validator");
 const { json } = require("express");
-const request = require('request')
-const config = require('config');
+const request = require("request");
+const config = require("config");
 const nodemon = require("nodemon");
 //current user profile
 router.get("/current", auth, async (req, res) => {
@@ -41,6 +42,8 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log(req.body);
+      console.log(errors);
       return res.status(400).json({ errors: errors.array() });
     }
     const {
@@ -127,6 +130,8 @@ router.get("/user/:user_id", async (req, res) => {
 //delete profile and user account and all related details
 router.delete("/", auth, async (req, res) => {
   try {
+    //delete posts
+    //await Post.deleteMany({ user: req.user.id });
     //remove profile
     await Profile.findOneAndRemove({ user: req.user.id });
     await User.findByIdAndRemove({ _id: req.user.id });
@@ -266,21 +271,23 @@ router.delete("/education/:edu_id", auth, async (req, res) => {
 
 //get github repos for a user
 router.get("/github/:username", (req, res) => {
-    try {
-        const options = {
-            uri:`https://api.github.com/users/${req.params.username}/repos?per_page=5&sort=created:asc&client_id=${config.get('githubclientid')}&client_secret=${config.get('githubsecret')}`,
-            method: 'GET',
-            headers: { 'user-agent': 'node.js' }
-        }
-        request(options, (error, response, body) => {
-            if (error) console.error(error);
-            if (response.statusCode != 200) {
-                return res.status(404).json({ msg: 'No Github Profile found' });
-
-            }
-            res.json(JSON.parse(body));
-        })
-        
+  try {
+    const options = {
+      uri: `https://api.github.com/users/${
+        req.params.username
+      }/repos?per_page=5&sort=created:asc&client_id=${config.get(
+        "githubclientid"
+      )}&client_secret=${config.get("githubsecret")}`,
+      method: "GET",
+      headers: { "user-agent": "node.js" },
+    };
+    request(options, (error, response, body) => {
+      if (error) console.error(error);
+      if (response.statusCode != 200) {
+        return res.status(404).json({ msg: "No Github Profile found" });
+      }
+      res.json(JSON.parse(body));
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
